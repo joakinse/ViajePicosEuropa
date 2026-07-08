@@ -9,20 +9,29 @@ type Todo = {
   created_at?: string
 }
 
-type DayPlan = {
-  date: string
+type ScheduleItem = {
+  time: string
   title: string
-  badge: string
-  summary: string
-  schedule: string[]
-  notes?: string[]
+  text: string
 }
 
 type RouteOption = {
   name: string
   tag: string
-  description: string
+  text: string
   details: string[]
+}
+
+type DayPlan = {
+  id: string
+  date: string
+  title: string
+  short: string
+  image: string
+  imageAlt: string
+  schedule: ScheduleItem[]
+  notes?: string[]
+  options?: RouteOption[]
 }
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -37,92 +46,106 @@ const initialTodos: Todo[] = [
   { id: 'meteo-picos', text: 'Revisar la previsión antes de decidir entre Áliva y Horcados Rojos.', done: false },
 ]
 
-const days: DayPlan[] = [
+const mondayOptions: RouteOption[] = [
   {
-    date: 'Viernes 17',
-    title: 'Madrid → Cangas / alrededores',
-    badge: 'Llegada tranquila',
-    summary: 'Salida a las 14:30 y llegada razonable entre 20:00 y 21:00.',
-    schedule: ['Check-in en el alojamiento.', 'Cena en Cangas o cerca.', 'Paseo corto si no llegáis tarde.'],
-    notes: ['No tocaría nada más: llegar, cenar y descansar.'],
-  },
-  {
-    date: 'Sábado 18',
-    title: 'Sella + Ribadesella + Cangas',
-    badge: 'Día largo',
-    summary: 'Mantenerlo todo con mentalidad de jornada completa y noche en Cangas.',
-    schedule: [
-      '09:45-10:00 salida hacia Arriondas / empresa del Sella.',
-      '10:30-15:30 descenso del Sella, comida y cambio.',
-      '16:00-19:00 Ribadesella: paseo marítimo, Santa Marina, puerto, casco histórico y Ermita de la Guía.',
-      '19:30-20:00 vuelta a Cangas.',
-      '20:00-21:00 ducha y descanso.',
-      '21:00 en adelante: puente romano, centro y sidrería.',
-    ],
-  },
-  {
-    date: 'Domingo 19',
-    title: 'Lagos + Covadonga + traslado + final',
-    badge: 'Reservar bus',
-    summary: 'Día eficiente, sin obsesionarse con llegar a las 18:00 si cenáis viendo el partido.',
-    schedule: [
-      '07:30 salida del alojamiento.',
-      '07:45-08:00 estar en parking o punto de bus.',
-      '08:00-08:30 bus a Lagos.',
-      '09:00-12:00 ruta circular: Enol, Ercina, Entrelagos y Minas de Buferrera.',
-      '12:00-13:00 bajada.',
-      '13:00-13:45 Santuario de Covadonga.',
-      '14:00-15:15 comida.',
-      '15:30-18:00 traslado hacia Potes o alrededores.',
-      '18:00-20:30 check-in, ducha, paseo corto o descanso.',
-      '21:00 cena viendo la final del Mundial.',
-    ],
-    notes: ['Intentad no apurar: la carretera hacia Liébana puede hacerse lenta y conviene localizar sitio con calma.'],
-  },
-  {
-    date: 'Lunes 20',
-    title: 'Fuente Dé con tres opciones abiertas',
-    badge: 'Teleférico temprano',
-    summary: 'Reservar una franja 09:00-09:30 o 09:30-10:00 para mantener abierta la ruta larga.',
-    schedule: [
-      'Subida en teleférico según franja reservada.',
-      'Decidir ruta final según clima, cansancio y visibilidad.',
-      'Tarde adaptable: Mogrovejo, Santo Toribio de Liébana, Potes y cena tranquila.',
-    ],
-  },
-  {
-    date: 'Martes 21',
-    title: 'Desfiladero + vuelta a Madrid',
-    badge: 'No cargar demasiado',
-    summary: 'Cerrar el viaje sin apurar, especialmente si el lunes fue montañero.',
-    schedule: [
-      '10:00 salida.',
-      '10:45-12:30 Desfiladero de la Hermida y Mirador de Santa Catalina.',
-      '13:00-14:30 comida.',
-      '15:00-16:00 salida hacia Madrid.',
-      '21:00-22:30 llegada aproximada.',
-    ],
-  },
-]
-
-const routeOptions: RouteOption[] = [
-  {
-    name: 'Opción 1: miradores de El Cable',
+    name: 'Miradores de El Cable',
     tag: 'Suave',
-    description: 'Para cansancio, niebla o un día contemplativo.',
+    text: 'Para cansancio, niebla o si preferís un día contemplativo.',
     details: ['1-2 h arriba.', 'Dificultad baja.', 'Deja mucha tarde para Mogrovejo, Santo Toribio y Potes.'],
   },
   {
-    name: 'Opción 2: El Cable → Hotel Áliva → vuelta',
+    name: 'El Cable → Hotel Áliva → vuelta',
     tag: 'Base',
-    description: 'La opción equilibrada para disfrutar sin complicarse.',
+    text: 'La opción equilibrada: montaña bonita sin complicaros.',
     details: ['Unos 7 km ida y vuelta.', '2h30-3h30 con paradas.', 'Dificultad baja/media.'],
   },
   {
-    name: 'Opción 3: Horcados Rojos',
+    name: 'Horcados Rojos',
     tag: 'Montañera',
-    description: 'La ruta seria si hay buen tiempo y energía.',
-    details: ['Unos 11 km ida y vuelta.', '5-6 h con paradas.', 'Dificultad media-alta y vistas al Naranjo si acompaña.'],
+    text: 'La ruta seria si el día sale despejado y os levantáis con energía.',
+    details: ['Unos 11 km ida y vuelta.', '5-6 h con paradas.', 'Dificultad media-alta. No subestimar terreno, viento o niebla.'],
+  },
+]
+
+const days: DayPlan[] = [
+  {
+    id: 'viernes',
+    date: 'Viernes 17',
+    title: 'Madrid → Cangas / alrededores',
+    short: 'Viaje en coche, llegada tranquila, check-in y cena cerca de Cangas.',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+    imageAlt: 'Carretera al atardecer para representar el viaje en coche',
+    schedule: [
+      { time: '14:30', title: 'Salida de Madrid', text: 'Salir sin meter más planes en el día. La prioridad es llegar con calma.' },
+      { time: '20:00-21:00', title: 'Llegada y check-in', text: 'Hora razonable de llegada a Cangas o alrededores según tráfico y paradas.' },
+      { time: '21:00', title: 'Cena y paseo corto', text: 'Cena cerca del alojamiento. Si no llegáis tarde, paseo breve por Cangas.' },
+    ],
+    notes: ['No añadiría nada más: este día es para llegar, cenar y descansar.'],
+  },
+  {
+    id: 'sabado',
+    date: 'Sábado 18',
+    title: 'Sella + Ribadesella + Cangas',
+    short: 'Descenso del Sella por la mañana, Ribadesella por la tarde y Cangas de noche.',
+    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
+    imageAlt: 'Río entre montañas para representar el descenso del Sella',
+    schedule: [
+      { time: '09:45-10:00', title: 'Salida hacia Arriondas', text: 'Ir hacia la empresa del Sella con margen suficiente.' },
+      { time: '10:30-15:30', title: 'Descenso del Sella', text: 'Descenso, comida y cambio. Día largo asumido, sin prisas después.' },
+      { time: '16:00-19:00', title: 'Ribadesella', text: 'Paseo marítimo, playa de Santa Marina, puerto, casco histórico y mirador de la Ermita de la Guía.' },
+      { time: '19:30-20:00', title: 'Vuelta a Cangas', text: 'Regreso para ducha y descanso.' },
+      { time: '21:00', title: 'Cangas de noche', text: 'Puente romano, centro y sidrería. Cangas queda como plan de noche, no como visita extensa.' },
+    ],
+  },
+  {
+    id: 'domingo',
+    date: 'Domingo 19',
+    title: 'Lagos + Covadonga + traslado + final',
+    short: 'Lagos de Covadonga temprano, santuario, traslado a Potes y final del Mundial cenando.',
+    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
+    imageAlt: 'Lago de montaña para representar Lagos de Covadonga',
+    schedule: [
+      { time: '07:30', title: 'Salida del alojamiento', text: 'Ir directos al parking o punto de bus.' },
+      { time: '07:45-08:00', title: 'Parking / bus', text: 'Estar listos para subir pronto. Reservar bus con antelación.' },
+      { time: '08:00-08:30', title: 'Bus a Lagos', text: 'Objetivo: estar arriba sobre 08:30-09:00.' },
+      { time: '09:00-12:00', title: 'Ruta circular por Lagos', text: 'Lago Enol, Lago Ercina, Mirador Entrelagos y Minas de Buferrera.' },
+      { time: '12:00-13:00', title: 'Bajada', text: 'Bajar con margen para no encajar mal comida y traslado.' },
+      { time: '13:00-13:45', title: 'Santuario de Covadonga', text: 'Visita concentrada, sin convertirlo en un plan largo.' },
+      { time: '14:00-15:15', title: 'Comida', text: 'Comer antes del traslado hacia Liébana.' },
+      { time: '15:30-18:00', title: 'Traslado a Potes o alrededores', text: 'La carretera hacia Liébana puede hacerse lenta. Mejor no apurar.' },
+      { time: '18:00-20:30', title: 'Check-in y descanso', text: 'Aparcar, ducha, paseo corto o descanso.' },
+      { time: '21:00', title: 'Final del Mundial', text: 'Cena viendo el partido. Si España llega, reservar mesa o llamar por la mañana.' },
+    ],
+  },
+  {
+    id: 'lunes',
+    date: 'Lunes 20',
+    title: 'Fuente Dé + Liébana',
+    short: 'Teleférico temprano y decisión en altura entre miradores, Áliva u Horcados Rojos.',
+    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+    imageAlt: 'Montañas altas para representar Fuente Dé y Picos de Europa',
+    schedule: [
+      { time: '09:00-10:00', title: 'Teleférico de Fuente Dé', text: 'Reservar franja de primera hora: 09:00-09:30 o 09:30-10:00.' },
+      { time: 'Mañana', title: 'Elegir ruta arriba', text: 'Decidir según clima, cansancio y visibilidad. Si hay niebla, viento o cansancio fuerte, bajar a opción suave o media.' },
+      { time: 'Tarde', title: 'Mogrovejo / Santo Toribio / Potes', text: 'Si hacéis opción 1 o 2, cabe todo con calma. Si hacéis Horcados Rojos, priorizar Mogrovejo y Potes.' },
+      { time: 'Noche', title: 'Cena tranquila', text: 'No meter planes por obligación después de una ruta larga.' },
+    ],
+    options: mondayOptions,
+  },
+  {
+    id: 'martes',
+    date: 'Martes 21',
+    title: 'Desfiladero + vuelta a Madrid',
+    short: 'Desfiladero de la Hermida, Mirador de Santa Catalina, comida y vuelta sin apurar.',
+    image: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=1200&q=80',
+    imageAlt: 'Desfiladero y carretera de montaña para representar la Hermida',
+    schedule: [
+      { time: '10:00', title: 'Salida', text: 'Empezar sin prisa, especialmente si el lunes fue montañero.' },
+      { time: '10:45-12:30', title: 'Hermida + Santa Catalina', text: 'Desfiladero de la Hermida y Mirador de Santa Catalina.' },
+      { time: '13:00-14:30', title: 'Comida', text: 'Última comida del viaje antes de carretera.' },
+      { time: '15:00-16:00', title: 'Salida hacia Madrid', text: 'No apurar demasiado el regreso.' },
+      { time: '21:00-22:30', title: 'Llegada aproximada', text: 'Llegada estimada a Madrid según tráfico y paradas.' },
+    ],
   },
 ]
 
@@ -281,80 +304,96 @@ function App() {
     }
   }
 
+  function handleDayChange(dayId: string) {
+    document.getElementById(dayId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <main>
-      <section className="hero-section" id="inicio">
-        <nav className="topbar" aria-label="Navegación principal">
-          <a href="#plan">Plan</a>
-          <a href="#fuente-de">Fuente Dé</a>
-          <a href="#tareas">Tareas</a>
-        </nav>
+      <nav className="topbar" aria-label="Navegación principal">
+        <a href="#resumen">Resumen</a>
+        <label>
+          <span>Día</span>
+          <select defaultValue="" onChange={(event) => handleDayChange(event.target.value)}>
+            <option value="" disabled>Ver detalle</option>
+            {days.map((day) => (
+              <option value={day.id} key={day.id}>{day.date}</option>
+            ))}
+          </select>
+        </label>
+        <a href="#tareas">Tareas</a>
+      </nav>
 
-        <div className="hero-grid">
-          <div>
-            <p className="eyebrow">17-21 julio · Asturias y Cantabria</p>
-            <h1>Viaje a Picos de Europa</h1>
-            <p className="hero-copy">
-              Ruta ligera para tener claro qué toca cada día: Sella, Lagos, Covadonga,
-              Fuente Dé, pueblos de Liébana y vuelta por la Hermida.
-            </p>
-          </div>
-          <aside className="hero-card" aria-label="Resumen rápido">
-            <span>Decisiones clave</span>
-            <strong>Bus de Lagos y teleférico temprano.</strong>
-            <p>La final del Mundial queda como plan de cena del domingo a las 21:00.</p>
-          </aside>
-        </div>
+      <section className="hero-section" id="inicio">
+        <p className="eyebrow">17-21 julio · Asturias y Cantabria</p>
+        <h1>Viaje a Picos de Europa</h1>
       </section>
 
-      <section className="section" id="plan">
+      <section className="section" id="resumen">
         <div className="section-heading">
-          <p className="eyebrow">Planning ajustado</p>
-          <h2>Plan del viaje</h2>
+          <p className="eyebrow">Vista rápida</p>
+          <h2>Qué hacemos cada día</h2>
+          <p>Un resumen corto para ubicarse. El detalle completo está más abajo, día por día, con horario.</p>
         </div>
-
-        <div className="timeline">
+        <div className="summary-grid">
           {days.map((day) => (
-            <article className="day-card" key={day.date}>
-              <div className="day-header">
-                <div>
-                  <p>{day.date}</p>
-                  <h3>{day.title}</h3>
-                </div>
-                <span>{day.badge}</span>
+            <a className="summary-card" href={`#${day.id}`} key={day.id}>
+              <img src={day.image} alt={day.imageAlt} loading="lazy" />
+              <div>
+                <span>{day.date}</span>
+                <h3>{day.title}</h3>
+                <p>{day.short}</p>
               </div>
-              <p className="summary">{day.summary}</p>
-              <ul>
-                {day.schedule.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              {day.notes?.map((note) => (
-                <p className="note" key={note}>{note}</p>
-              ))}
-            </article>
+            </a>
           ))}
         </div>
       </section>
 
-      <section className="section route-section" id="fuente-de">
+      <section className="section details-section" id="detalle">
         <div className="section-heading">
-          <p className="eyebrow">Lunes 20</p>
-          <h2>Tres niveles para Fuente Dé</h2>
-          <p>Elegid la ruta final según clima, cansancio y visibilidad al llegar arriba.</p>
+          <p className="eyebrow">Horario detallado</p>
+          <h2>Detalle por días</h2>
         </div>
 
-        <div className="route-grid">
-          {routeOptions.map((option) => (
-            <article className="route-card" key={option.name}>
-              <span>{option.tag}</span>
-              <h3>{option.name}</h3>
-              <p>{option.description}</p>
-              <ul>
-                {option.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
+        <div className="day-details">
+          {days.map((day) => (
+            <article className="detail-card" id={day.id} key={day.id}>
+              <img className="detail-image" src={day.image} alt={day.imageAlt} loading="lazy" />
+              <div className="detail-content">
+                <p className="eyebrow">{day.date}</p>
+                <h3>{day.title}</h3>
+                <p className="summary">{day.short}</p>
+                <div className="schedule">
+                  {day.schedule.map((item) => (
+                    <div className="schedule-item" key={`${day.id}-${item.time}-${item.title}`}>
+                      <time>{item.time}</time>
+                      <div>
+                        <h4>{item.title}</h4>
+                        <p>{item.text}</p>
+                        {day.id === 'lunes' && item.time === 'Mañana' && day.options ? (
+                          <div className="option-grid">
+                            {day.options.map((option) => (
+                              <section className="option-card" key={option.name}>
+                                <span>{option.tag}</span>
+                                <h5>{option.name}</h5>
+                                <p>{option.text}</p>
+                                <ul>
+                                  {option.details.map((detail) => (
+                                    <li key={detail}>{detail}</li>
+                                  ))}
+                                </ul>
+                              </section>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {day.notes?.map((note) => (
+                  <p className="note" key={note}>{note}</p>
                 ))}
-              </ul>
+              </div>
             </article>
           ))}
         </div>
