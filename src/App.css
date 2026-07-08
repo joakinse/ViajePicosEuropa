@@ -15,20 +15,18 @@ main {
   display: flex;
   gap: 10px;
   justify-content: center;
-  left: 50%;
+  margin: 14px auto 0;
   padding: 8px;
   position: sticky;
   top: 14px;
-  transform: translateX(-50%);
   width: max-content;
   z-index: 10;
 }
 
 .topbar a,
-.topbar label {
+.day-select {
   align-items: center;
   border-radius: 999px;
-  color: #365349;
   display: inline-flex;
   font-size: 0.92rem;
   font-weight: 800;
@@ -37,21 +35,19 @@ main {
   text-decoration: none;
 }
 
-.topbar label {
-  background: #20302c;
-  color: #fff7e7;
+.topbar a {
+  color: #365349;
 }
 
-.topbar select {
+.day-select {
   appearance: none;
-  background: #fff7e7;
+  background: #20302c;
   border: 0;
-  border-radius: 999px;
-  color: #20302c;
+  color: #fff7e7;
   cursor: pointer;
   font: inherit;
   font-weight: 800;
-  padding: 7px 28px 7px 12px;
+  padding-right: 34px;
 }
 
 .hero-section,
@@ -147,7 +143,7 @@ h5 {
 }
 
 .summary-card,
-.detail-card,
+detail-card,
 .todos-section {
   border: 1px solid rgba(32, 48, 44, 0.12);
   box-shadow: 0 22px 80px rgba(34, 50, 40, 0.08);
@@ -209,7 +205,9 @@ h5 {
 
 .detail-card {
   background: rgba(255, 252, 245, 0.86);
+  border: 1px solid rgba(32, 48, 44, 0.12);
   border-radius: 34px;
+  box-shadow: 0 22px 80px rgba(34, 50, 40, 0.08);
   display: grid;
   grid-template-columns: minmax(280px, 0.42fr) minmax(0, 0.58fr);
   overflow: hidden;
@@ -413,7 +411,7 @@ h5 {
   }
 
   .topbar a,
-  .topbar label {
+  .day-select {
     flex: 1 1 auto;
     justify-content: center;
   }

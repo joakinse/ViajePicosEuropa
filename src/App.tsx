@@ -312,15 +312,12 @@ function App() {
     <main>
       <nav className="topbar" aria-label="Navegación principal">
         <a href="#resumen">Resumen</a>
-        <label>
-          <span>Día</span>
-          <select defaultValue="" onChange={(event) => handleDayChange(event.target.value)}>
-            <option value="" disabled>Ver detalle</option>
-            {days.map((day) => (
-              <option value={day.id} key={day.id}>{day.date}</option>
-            ))}
-          </select>
-        </label>
+        <select className="day-select" defaultValue="" onChange={(event) => handleDayChange(event.target.value)} aria-label="Ver detalle por día">
+          <option value="" disabled>Días</option>
+          {days.map((day) => (
+            <option value={day.id} key={day.id}>{day.date}</option>
+          ))}
+        </select>
         <a href="#tareas">Tareas</a>
       </nav>
 
